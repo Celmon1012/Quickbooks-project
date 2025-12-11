@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Database,
@@ -11,11 +11,14 @@ import {
   Monitor,
   Sun,
   Moon,
+  LogOut,
+  Loader2,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { label: "PLATFORM", items: [
@@ -32,8 +35,12 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const { user, signOut, loading } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -44,6 +51,49 @@ export function Sidebar() {
   }
 
   const isDark = resolvedTheme === "dark";
+
+  // Get user display name and initials
+  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+  const initials = displayName
+    .split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+
+  const handleLogout = async () => {
+    setSigningOut(true);
+    setShowLogout(false);
+    
+    try {
+      // Call server-side logout to clear cookies
+      await fetch("/auth/signout", { method: "POST" });
+      // Also sign out client-side
+      await signOut();
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+    // Force full page reload to /login to ensure all state is cleared
+    window.location.href = "/login";
+  };
+
+  // Show full-page loading overlay when signing out
+  if (signingOut) {
+    return (
+      <>
+        {/* Full page overlay */}
+        <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
+            <p className="text-white text-lg font-medium">Signing out...</p>
+          </div>
+        </div>
+        {/* Keep sidebar visible behind overlay */}
+        <aside className="w-full bg-white dark:bg-[#1a1f2e] border-r border-gray-200 dark:border-white/10 flex flex-col h-screen transition-colors duration-300" />
+      </>
+    );
+  }
 
   return (
     <aside className="w-full bg-white dark:bg-[#1a1f2e] border-r border-gray-200 dark:border-white/10 flex flex-col h-screen transition-colors duration-300">
@@ -106,15 +156,40 @@ export function Sidebar() {
 
       {/* User Profile */}
       <div className="p-4 border-t border-gray-200 dark:border-white/10">
-        <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer">
-          <Avatar className="w-10 h-10 border border-gray-200 dark:border-white/10">
-            <AvatarImage src="/avatar.png" />
-            <AvatarFallback className="bg-indigo-600 text-white font-medium">AM</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">Alex M.</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">Pro Plan</p>
+        <div className="relative">
+          <div 
+            onClick={() => setShowLogout(!showLogout)}
+            className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+          >
+            <Avatar className="w-10 h-10 border border-gray-200 dark:border-white/10">
+              <AvatarImage src={avatarUrl} />
+              <AvatarFallback className="bg-indigo-600 text-white font-medium">{initials}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{displayName}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.email || "Loading..."}</p>
+            </div>
           </div>
+          
+          {/* Logout popup on click */}
+          {showLogout && (
+            <>
+              {/* Backdrop to close popup when clicking outside */}
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={() => setShowLogout(false)}
+              />
+              <div className="absolute bottom-full left-0 right-0 mb-2 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign out
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </aside>
