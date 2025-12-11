@@ -16,6 +16,7 @@ interface Props {
   currentPeriod: { label: string; value: number };
   comparisonPeriod: { label: string; value: number };
   isPositive: boolean;
+  isNeutral?: boolean;
   metric: Metric;
 }
 
@@ -23,6 +24,7 @@ export function ComparisonChart({
   currentPeriod,
   comparisonPeriod,
   isPositive,
+  isNeutral = false,
   metric,
 }: Props) {
   const data = [
@@ -30,32 +32,36 @@ export function ComparisonChart({
     { period: comparisonPeriod.label, value: comparisonPeriod.value },
   ];
 
-  // For COGS and Fixed Overhead, colors are reversed
-  const isReversedMetric = metric === "cogs" || metric === "fixed_overhead";
-  
+  // Color coding:
+  // - Green: Metric improved (revenue/margin up, costs down)
+  // - Red: Metric declined (revenue/margin down, costs up)
+  // - Yellow: No significant change (within ±2%)
   const getBarColor = (index: number) => {
     if (index === 0) {
       // Current period
-      return isPositive ? "#22c55e" : "#ef4444"; // green or red
+      if (isNeutral) {
+        return "#eab308"; // Yellow for neutral
+      }
+      return isPositive ? "#22c55e" : "#ef4444"; // Green or red
     }
     // Comparison period - always gray
-    return "#d1d5db";
+    return "#9ca3af";
   };
 
   return (
     <div className="h-full min-h-[80px]">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} layout="vertical" margin={{ left: 20, right: 60 }}>
+        <BarChart data={data} layout="vertical" margin={{ left: 10, right: 70 }}>
           <XAxis type="number" hide />
           <YAxis
             type="category"
             dataKey="period"
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 12, fill: "#6b7280" }}
-            width={80}
+            tick={{ fontSize: 11, fill: "#9ca3af" }}
+            width={90}
           />
-          <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
+          <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={28}>
             {data.map((_, index) => (
               <Cell key={`cell-${index}`} fill={getBarColor(index)} />
             ))}
@@ -63,7 +69,7 @@ export function ComparisonChart({
               dataKey="value"
               position="right"
               formatter={(value: any) => formatCurrency(Number(value))}
-              style={{ fontSize: 12, fontWeight: 500 }}
+              style={{ fontSize: 12, fontWeight: 600, fill: "#e5e7eb" }}
             />
           </Bar>
         </BarChart>

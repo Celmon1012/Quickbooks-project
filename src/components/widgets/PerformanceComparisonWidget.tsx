@@ -13,7 +13,7 @@ import { ComparisonChart } from "./ComparisonChart";
 import { usePerformanceData } from "@/hooks/usePerformanceData";
 import { TimePeriod, Metric } from "@/types";
 import { formatCurrency, formatPercentage } from "@/lib/utils";
-import { TrendingUp, TrendingDown, MoreHorizontal } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, MoreHorizontal, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -116,24 +116,33 @@ export function PerformanceComparisonWidget({ companyId, className }: Props) {
                 currentPeriod={data.currentPeriod}
                 comparisonPeriod={data.comparisonPeriod}
                 isPositive={data.change.isPositive}
+                isNeutral={data.change.isNeutral}
                 metric={metric}
               />
             </div>
 
             {/* Change Indicator */}
             <div className="flex items-center justify-center gap-2 py-2 shrink-0">
-              {data.change.isPositive ? (
+              {data.change.isNeutral ? (
+                <Minus className="w-5 h-5 text-yellow-500 dark:text-yellow-400" />
+              ) : data.change.isPositive ? (
                 <TrendingUp className="w-5 h-5 text-green-500 dark:text-green-400" />
               ) : (
                 <TrendingDown className="w-5 h-5 text-red-500 dark:text-red-400" />
               )}
               <span
-                className={`text-lg font-semibold ${
-                  data.change.isPositive ? "text-green-500 dark:text-green-400" : "text-red-500 dark:text-red-400"
-                }`}
+                className={cn(
+                  "text-lg font-semibold",
+                  data.change.isNeutral 
+                    ? "text-yellow-500 dark:text-yellow-400"
+                    : data.change.isPositive 
+                      ? "text-green-500 dark:text-green-400" 
+                      : "text-red-500 dark:text-red-400"
+                )}
               >
                 {data.change.amount >= 0 ? "+" : ""}
                 {formatCurrency(data.change.amount)} ({formatPercentage(data.change.percentage)})
+                {data.change.isNeutral ? "" : data.change.isPositive ? " ↑" : " ↓"}
               </span>
             </div>
 
@@ -146,7 +155,13 @@ export function PerformanceComparisonWidget({ companyId, className }: Props) {
                     <span className="text-gray-500 dark:text-gray-400">{rm.name}:</span>{" "}
                     <span className="font-medium text-gray-900 dark:text-gray-200">{formatCurrency(rm.value)}</span>{" "}
                     <span
-                      className={rm.change >= 0 ? "text-green-500 dark:text-green-400" : "text-red-500 dark:text-red-400"}
+                      className={cn(
+                        Math.abs(rm.change) <= 2 
+                          ? "text-yellow-500 dark:text-yellow-400"
+                          : rm.change >= 0 
+                            ? "text-green-500 dark:text-green-400" 
+                            : "text-red-500 dark:text-red-400"
+                      )}
                     >
                       ({formatPercentage(rm.change)})
                     </span>
@@ -154,6 +169,18 @@ export function PerformanceComparisonWidget({ companyId, className }: Props) {
                 ))}
               </div>
             </div>
+
+            {/* AI Insights Section */}
+            {data.aiInsight && (
+              <div className="border-t border-gray-100 dark:border-gray-700 pt-2 mt-2 shrink-0">
+                <div className="flex items-start gap-2">
+                  <Sparkles className="w-4 h-4 text-purple-500 dark:text-purple-400 mt-0.5 shrink-0" />
+                  <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {data.aiInsight}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </CardContent>

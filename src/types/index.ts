@@ -31,8 +31,10 @@ export interface PerformanceData {
     amount: number;
     percentage: number;
     isPositive: boolean;
+    isNeutral?: boolean; // Within ±2%
   };
   relatedMetrics: RelatedMetric[];
+  aiInsight?: string; // AI-generated insight
 }
 
 export interface RelatedMetric {
@@ -48,6 +50,22 @@ export interface ProjectionData {
   cashFlow: number;
   netProfit: number;
   isProjected: boolean;
+  seasonalityFactor?: number;
+  recurringExpenses?: RecurringExpense[];
+}
+
+export interface RecurringExpense {
+  description: string;
+  amount: number;
+  expected_date: string;
+}
+
+// Projection Insight
+export interface ProjectionInsight {
+  type: "seasonality" | "trend" | "recurring" | "warning";
+  message: string;
+  icon?: string;
+  severity?: "info" | "warning" | "success";
 }
 
 // Company
