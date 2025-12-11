@@ -68,9 +68,9 @@ export function PerformanceComparisonWidget({ companyId, className }: Props) {
             <SelectTrigger className="w-full sm:w-[260px] text-xs bg-white dark:bg-gray-900 border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-200">
               <SelectValue placeholder="Select time period" />
             </SelectTrigger>
-            <SelectContent className="dark:bg-gray-900 dark:border-white/10">
+            <SelectContent className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-white/10 shadow-lg">
               {TIME_PERIODS.map((period) => (
-                <SelectItem key={period.value} value={period.value} className="text-xs dark:text-gray-200 dark:focus:bg-gray-800">
+                <SelectItem key={period.value} value={period.value} className="text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus:bg-gray-100 dark:focus:bg-gray-800">
                   {period.label}
                 </SelectItem>
               ))}
@@ -84,9 +84,9 @@ export function PerformanceComparisonWidget({ companyId, className }: Props) {
             <SelectTrigger className="w-full sm:w-[160px] text-xs bg-white dark:bg-gray-900 border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-200">
               <SelectValue placeholder="Select metric" />
             </SelectTrigger>
-            <SelectContent className="dark:bg-gray-900 dark:border-white/10">
+            <SelectContent className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-white/10 shadow-lg">
               {METRICS.map((m) => (
-                <SelectItem key={m.value} value={m.value} className="text-xs dark:text-gray-200 dark:focus:bg-gray-800">
+                <SelectItem key={m.value} value={m.value} className="text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus:bg-gray-100 dark:focus:bg-gray-800">
                   {m.label}
                 </SelectItem>
               ))}
