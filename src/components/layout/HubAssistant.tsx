@@ -1,12 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Send } from "lucide-react";
+import { Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-export function HubAssistant() {
+interface HubAssistantProps {
+  onClose?: () => void;
+  showCloseButton?: boolean;
+}
+
+export function HubAssistant({ onClose, showCloseButton = false }: HubAssistantProps) {
   const [message, setMessage] = useState("");
 
   const handleSend = () => {
@@ -19,10 +24,19 @@ export function HubAssistant() {
   return (
     <div className="w-full border-r bg-white dark:bg-[#1a1f2e] border-gray-200 dark:border-white/10 flex flex-col h-full transition-colors duration-300">
       {/* Header */}
-      <div className="h-16 px-6 border-b border-gray-200 dark:border-white/10 flex items-center">
+      <div className="h-16 px-4 sm:px-6 border-b border-gray-200 dark:border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-2">
+          {/* Close button - only on mobile */}
+          {showCloseButton && onClose && (
+            <button 
+              onClick={onClose}
+              className="p-2 -ml-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 lg:hidden"
+            >
+              <X className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            </button>
+          )}
           <div className="w-2 h-2 bg-green-500 rounded-full" />
-          <span className="text-xl font-bold text-gray-900 dark:text-white">Hub Assistant</span>
+          <span className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Hub Assistant</span>
         </div>
       </div>
 

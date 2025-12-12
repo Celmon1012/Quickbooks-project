@@ -62,48 +62,48 @@ export function ProjectionsWidget({ companyId }: Props) {
 
   return (
     <Card className="bg-white dark:bg-gray-800/50 border-gray-200 dark:border-white/10 h-full shadow-sm overflow-hidden flex flex-col">
-      <CardHeader className="pb-2 shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-indigo-500" />
-            <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-200">
-              12-Month Financial Projections
+      <CardHeader className="pb-2 shrink-0 px-3 sm:px-4 pt-3 sm:pt-4">
+        <div className="flex items-start sm:items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            <Activity className="w-4 h-4 text-indigo-500 shrink-0" />
+            <CardTitle className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200">
+              12-Month Projections
             </CardTitle>
             {/* Data source indicator */}
             {!loading && data.length > 0 && (
               <span className={cn(
-                "text-[10px] px-1.5 py-0.5 rounded-full font-medium uppercase tracking-wide",
+                "text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 rounded-full font-medium uppercase tracking-wide",
                 isRealData 
                   ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400"
                   : "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400"
               )}>
-                {isRealData ? "Live Data" : "Demo"}
+                {isRealData ? "Live" : "Demo"}
               </span>
             )}
           </div>
-          <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+          <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 shrink-0">
             <MoreHorizontal className="w-4 h-4" />
           </button>
         </div>
         
         {/* Quick Stats */}
         {data.length > 0 && !loading && (
-          <div className="flex items-center gap-4 mt-2">
-            <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
+            <div className="flex items-center gap-1 sm:gap-1.5">
               {revenueGrowth >= 0 ? (
-                <TrendingUp className="w-3.5 h-3.5 text-green-500" />
+                <TrendingUp className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-green-500" />
               ) : (
-                <TrendingDown className="w-3.5 h-3.5 text-red-500" />
+                <TrendingDown className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-red-500" />
               )}
               <span className={cn(
-                "text-xs font-medium",
+                "text-[10px] sm:text-xs font-medium",
                 revenueGrowth >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
               )}>
-                {revenueGrowth >= 0 ? "+" : ""}{revenueGrowth.toFixed(1)}% projected growth
+                {revenueGrowth >= 0 ? "+" : ""}{revenueGrowth.toFixed(1)}% growth
               </span>
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              {historicalData.length} historical • {projectedData.length} projected months
+            <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
+              {historicalData.length} hist. • {projectedData.length} proj.
             </div>
           </div>
         )}
