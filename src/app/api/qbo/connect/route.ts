@@ -4,8 +4,8 @@ import { cookies } from "next/headers";
 // QuickBooks OAuth Configuration
 const QBO_CLIENT_ID = process.env.QBO_CLIENT_ID || "";
 const QBO_REDIRECT_URI = process.env.NODE_ENV === "production"
-  ? "https://quickbooks-project.vercel.app/api/qbo/callback"
-  : "http://localhost:3000/api/qbo/callback";
+  ? "https://quickbooks-project.vercel.app/auth/callback"
+  : "http://localhost:3000/auth/callback";
 
 // QuickBooks OAuth URLs
 const QBO_AUTH_URL = "https://appcenter.intuit.com/connect/oauth2";
@@ -29,8 +29,8 @@ export async function GET(request: Request) {
     // Generate a random state for CSRF protection
     const state = crypto.randomUUID();
 
-    // Store state in cookie for verification during callback
-    const cookieStore = cookies();
+    // Store state in cookie for verification during callback (await in Next.js 15)
+    const cookieStore = await cookies();
     cookieStore.set("qbo_oauth_state", state, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
