@@ -36,8 +36,8 @@ export async function GET(request: Request) {
       );
     }
 
-    // Verify state for CSRF protection
-    const cookieStore = cookies();
+    // Verify state for CSRF protection (await in Next.js 15+)
+    const cookieStore = await cookies();
     const storedState = cookieStore.get("qbo_oauth_state")?.value;
 
     if (!storedState || storedState !== state) {
