@@ -11,9 +11,10 @@ const QBO_REDIRECT_URI = process.env.NODE_ENV === "production"
 const QBO_AUTH_URL = "https://appcenter.intuit.com/connect/oauth2";
 
 // Scopes required for QuickBooks access
+// Note: Only requesting accounting scope - payments scope requires merchant account approval
 const QBO_SCOPES = [
   "com.intuit.quickbooks.accounting",
-  "com.intuit.quickbooks.payment",
+  // "com.intuit.quickbooks.payment", // Removed - requires approved merchant account
 ].join(" ");
 
 export async function GET(request: Request) {
