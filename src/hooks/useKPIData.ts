@@ -61,11 +61,11 @@ export function useKPIData(companyId: string | null) {
         if (previousError) throw previousError;
 
         // Calculate totals
-        const currentRevenue = (currentData || []).reduce((sum, row) => sum + (Number(row.revenue) || 0), 0);
-        const previousRevenue = (previousData || []).reduce((sum, row) => sum + (Number(row.revenue) || 0), 0);
+        const currentRevenue = (currentData || []).reduce((sum: number, row: any) => sum + (Number(row.revenue) || 0), 0);
+        const previousRevenue = (previousData || []).reduce((sum: number, row: any) => sum + (Number(row.revenue) || 0), 0);
         
-        const currentNetProfit = (currentData || []).reduce((sum, row) => sum + (Number(row.net_profit) || 0), 0);
-        const previousNetProfit = (previousData || []).reduce((sum, row) => sum + (Number(row.net_profit) || 0), 0);
+        const currentNetProfit = (currentData || []).reduce((sum: number, row: any) => sum + (Number(row.net_profit) || 0), 0);
+        const previousNetProfit = (previousData || []).reduce((sum: number, row: any) => sum + (Number(row.net_profit) || 0), 0);
 
         // Calculate changes
         const revenueChange = previousRevenue !== 0 
