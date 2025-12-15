@@ -5,11 +5,12 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { HubAssistant } from "@/components/layout/HubAssistant";
 import { Header } from "@/components/layout/Header";
 import { DashboardGrid } from "@/components/layout/DashboardGrid";
-import { Menu, X, MessageSquare } from "lucide-react";
+import { EmptyDashboardState } from "@/components/widgets/EmptyDashboardState";
+import { useQBOConnection } from "@/hooks/useQBOConnection";
+import { Menu, X, MessageSquare, Loader2 } from "lucide-react";
 
 export default function DashboardPage() {
-  // TODO: Get from auth/context
-  const companyId = "035f1c08-79e6-4559-8377-81e9ac5f8d77"; // Hustle Gear
+  const { connection, isConnected, companyId, loading } = useQBOConnection();
   
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [assistantOpen, setAssistantOpen] = useState(false);
@@ -86,7 +87,19 @@ export default function DashboardPage() {
           <Header title="Finance Hub" />
         </div>
         
-        <DashboardGrid companyId={companyId} />
+        {/* Content Area - Show loading, empty state, or dashboard */}
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+              <p className="text-gray-500 dark:text-gray-400">Loading your data...</p>
+            </div>
+          </div>
+        ) : isConnected && companyId ? (
+          <DashboardGrid companyId={companyId} />
+        ) : (
+          <EmptyDashboardState />
+        )}
       </div>
     </div>
   );

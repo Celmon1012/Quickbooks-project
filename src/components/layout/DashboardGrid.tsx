@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { KPICard } from "@/components/widgets/KPICard";
 import { PerformanceComparisonWidget } from "@/components/widgets/PerformanceComparisonWidget";
 import { ProjectionsWidget } from "@/components/widgets/ProjectionsWidget";
+import { useKPIData } from "@/hooks/useKPIData";
 
 type TimeRange = "today" | "7d" | "30d" | "3m" | "ytd";
 
@@ -15,6 +16,7 @@ interface DashboardGridProps {
 
 export function DashboardGrid({ companyId }: DashboardGridProps) {
   const [timeRange, setTimeRange] = useState<TimeRange>("30d");
+  const { data: kpiData, loading: kpiLoading } = useKPIData(companyId);
 
   const timeRanges: { value: TimeRange; label: string }[] = [
     { value: "today", label: "Today" },
@@ -35,20 +37,32 @@ export function DashboardGrid({ companyId }: DashboardGridProps) {
             {/* KPI Cards - Mobile: Full width side by side, Tablet: Stacked, Desktop: Left column */}
             <div className="grid grid-cols-2 sm:grid-cols-1 lg:col-span-3 gap-4 sm:gap-6">
               <div className="min-h-[140px] sm:min-h-[180px] lg:flex-1 lg:min-h-0">
-                <KPICard
-                  title="Total Revenue"
-                  value={2400000}
-                  change={12.5}
-                  format="currency"
-                />
+                {kpiLoading ? (
+                  <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-white/10 rounded-lg h-full flex items-center justify-center">
+                    <div className="animate-pulse text-gray-400">Loading...</div>
+                  </div>
+                ) : (
+                  <KPICard
+                    title="Total Revenue"
+                    value={kpiData?.totalRevenue ?? 0}
+                    change={kpiData?.revenueChange ?? 0}
+                    format="currency"
+                  />
+                )}
               </div>
               <div className="min-h-[140px] sm:min-h-[180px] lg:flex-1 lg:min-h-0">
-                <KPICard
-                  title="Active Users"
-                  value={14203}
-                  change={8.2}
-                  format="number"
-                />
+                {kpiLoading ? (
+                  <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-white/10 rounded-lg h-full flex items-center justify-center">
+                    <div className="animate-pulse text-gray-400">Loading...</div>
+                  </div>
+                ) : (
+                  <KPICard
+                    title="Net Profit"
+                    value={kpiData?.netProfit ?? 0}
+                    change={kpiData?.netProfitChange ?? 0}
+                    format="currency"
+                  />
+                )}
               </div>
             </div>
 

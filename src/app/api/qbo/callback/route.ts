@@ -12,6 +12,9 @@ const QBO_REDIRECT_URI = process.env.NODE_ENV === "production"
 // QuickBooks Token URL
 const QBO_TOKEN_URL = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer";
 
+// Pipedream Webhook URLs (for triggering backfill after connection)
+const PIPEDREAM_BACKFILL_WEBHOOK = process.env.PIPEDREAM_BACKFILL_WEBHOOK || "";
+
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
@@ -36,7 +39,7 @@ export async function GET(request: Request) {
       );
     }
 
-    // Verify state for CSRF protection (await in Next.js 15+)
+    // Verify state for CSRF protection
     const cookieStore = await cookies();
     const storedState = cookieStore.get("qbo_oauth_state")?.value;
 
@@ -83,7 +86,7 @@ export async function GET(request: Request) {
     // Get Supabase client
     const supabase = await createClient();
 
-    // Get current user
+    // Get current user - CRITICAL for user isolation
     const { data: { user }, error: userError } = await supabase.auth.getUser();
 
     if (userError || !user) {
@@ -93,24 +96,53 @@ export async function GET(request: Request) {
       );
     }
 
-    // Check if a company exists for this realm_id
+    console.log("User authenticated:", user.id);
+
+    // Fetch company name from QuickBooks
+    let companyName = `QuickBooks Company ${realmId}`;
+    try {
+      const qboCompanyUrl = `https://quickbooks.api.intuit.com/v3/company/${realmId}/companyinfo/${realmId}`;
+      const qboResponse = await fetch(qboCompanyUrl, {
+        headers: {
+          "Authorization": `Bearer ${tokens.access_token}`,
+          "Accept": "application/json",
+        },
+      });
+      
+      if (qboResponse.ok) {
+        const qboData = await qboResponse.json();
+        if (qboData?.CompanyInfo?.CompanyName) {
+          companyName = qboData.CompanyInfo.CompanyName;
+        }
+      }
+    } catch (e) {
+      console.log("Could not fetch company name from QBO, using default");
+    }
+
+    console.log("Company name:", companyName);
+
+    // Check if company already exists for this realm_id AND user
     let companyId: string | null = null;
+    let isNewCompany = false;
 
     const { data: existingCompany } = await supabase
       .from("companies")
       .select("id")
       .eq("realm_id", realmId)
+      .eq("user_id", user.id)
       .single();
 
     if (existingCompany) {
       companyId = existingCompany.id;
+      console.log("Found existing company:", companyId);
     } else {
-      // Create a new company
+      // Create a new company with user_id
       const { data: newCompany, error: companyError } = await supabase
         .from("companies")
         .insert({
-          name: `QuickBooks Company ${realmId}`,
+          name: companyName,
           realm_id: realmId,
+          user_id: user.id, // CRITICAL: Link to user
         })
         .select("id")
         .single();
@@ -123,16 +155,22 @@ export async function GET(request: Request) {
       }
 
       companyId = newCompany.id;
+      isNewCompany = true;
+      console.log("Created new company:", companyId);
     }
 
-    // Check if connection already exists for this realm_id
+    // Check if connection already exists for this realm_id AND user
     const { data: existingConnection } = await supabase
       .from("qbo_connections")
       .select("id")
       .eq("realm_id", realmId)
+      .eq("user_id", user.id)
       .single();
 
+    let connectionId: string;
+
     if (existingConnection) {
+      connectionId = existingConnection.id;
       // Update existing connection
       const { error: updateError } = await supabase
         .from("qbo_connections")
@@ -150,18 +188,22 @@ export async function GET(request: Request) {
           new URL("/data-sources?error=connection_update_failed", request.url)
         );
       }
+      console.log("Updated existing connection:", connectionId);
     } else {
-      // Create new connection
-      const { error: insertError } = await supabase
+      // Create new connection with user_id
+      const { data: newConnection, error: insertError } = await supabase
         .from("qbo_connections")
         .insert({
           company_id: companyId,
+          user_id: user.id, // CRITICAL: Link to user
           access_token: tokens.access_token,
           refresh_token: tokens.refresh_token,
           realm_id: realmId,
           qbo_company_id: realmId,
           expires_at: expiresAt.toISOString(),
-        });
+        })
+        .select("id")
+        .single();
 
       if (insertError) {
         console.error("Error creating connection:", insertError);
@@ -169,9 +211,43 @@ export async function GET(request: Request) {
           new URL("/data-sources?error=connection_creation_failed", request.url)
         );
       }
+
+      connectionId = newConnection.id;
+      console.log("Created new connection:", connectionId);
     }
 
-    console.log("QBO connection saved successfully for realm:", realmId);
+    // Create sync_status record (pending)
+    await supabase
+      .from("sync_status")
+      .insert({
+        connection_id: connectionId,
+        company_id: companyId,
+        sync_type: isNewCompany ? "initial" : "incremental",
+        status: "pending",
+      });
+
+    // Trigger Pipedream backfill webhook if configured
+    if (PIPEDREAM_BACKFILL_WEBHOOK && isNewCompany) {
+      try {
+        console.log("Triggering Pipedream backfill webhook...");
+        await fetch(PIPEDREAM_BACKFILL_WEBHOOK, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            realm_id: realmId,
+            company_id: companyId,
+            user_id: user.id,
+            action: "backfill",
+          }),
+        });
+        console.log("Pipedream webhook triggered successfully");
+      } catch (e) {
+        console.error("Failed to trigger Pipedream webhook:", e);
+        // Don't fail the connection if webhook fails
+      }
+    }
+
+    console.log("QBO connection saved successfully for realm:", realmId, "user:", user.id);
 
     // Redirect to data sources page with success message
     return NextResponse.redirect(
@@ -184,4 +260,3 @@ export async function GET(request: Request) {
     );
   }
 }
-
