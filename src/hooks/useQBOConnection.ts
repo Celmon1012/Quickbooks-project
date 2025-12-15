@@ -33,7 +33,7 @@ export function useQBOConnection() {
       try {
         const supabase = createClient();
         
-        // Fetch the user's QBO connections
+        // Fetch the user's QBO connections - MUST filter by user_id!
         const { data, error: fetchError } = await supabase
           .from("qbo_connections")
           .select(`
@@ -43,8 +43,10 @@ export function useQBOConnection() {
             qbo_company_id,
             expires_at,
             last_sync_at,
+            user_id,
             company:companies(name)
           `)
+          .eq("user_id", user.id)  // CRITICAL: Only get THIS user's connections
           .order("created_at", { ascending: false })
           .limit(1)
           .single();
