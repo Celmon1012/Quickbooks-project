@@ -236,85 +236,80 @@ export default function DataSourcesPage() {
               </p>
             </div>
 
-            {/* Available Integrations */}
-            <Card className="bg-white dark:bg-gray-800/50 border-gray-200 dark:border-white/10">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Database className="w-5 h-5 text-indigo-500" />
-                  Available Integrations
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* QuickBooks Online */}
-                  <div className="border border-gray-200 dark:border-white/10 rounded-xl p-6 hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-colors">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
-                          <span className="text-white font-bold text-lg">QB</span>
+            {/* QuickBooks Integration Card */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#2ca01c] via-[#108a00] to-[#0d6b00] p-[1px]">
+              <div className="relative rounded-2xl bg-gradient-to-br from-[#2ca01c]/95 via-[#108a00]/95 to-[#0d6b00]/95 backdrop-blur-xl overflow-hidden">
+                {/* Decorative elements */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+                
+                <div className="relative p-8 sm:p-10">
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-6">
+                    {/* Logo & Info */}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg shadow-black/20">
+                          <svg viewBox="0 0 40 40" className="w-10 h-10">
+                            <circle cx="20" cy="20" r="18" fill="#2CA01C"/>
+                            <path d="M12 20c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round"/>
+                            <circle cx="20" cy="20" r="3" fill="white"/>
+                          </svg>
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900 dark:text-white">
+                          <h3 className="text-2xl font-bold text-white">
                             QuickBooks Online
                           </h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Accounting & Invoicing
+                          <p className="text-green-100/80 text-sm font-medium">
+                            Accounting & Financial Management
                           </p>
                         </div>
                       </div>
+                      
+                      <p className="text-green-50/90 text-base mb-6 max-w-lg">
+                        Connect your QuickBooks account to automatically sync your financial data and unlock powerful insights for your business.
+                      </p>
+                      
+                      {/* Features */}
+                      <div className="grid grid-cols-2 gap-3 mb-8">
+                        {[
+                          "Income & Expenses",
+                          "Invoices & Payments",
+                          "Profit & Loss Reports",
+                          "Real-time Sync"
+                        ].map((feature) => (
+                          <div key={feature} className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-green-200" />
+                            <span className="text-sm text-green-50/90">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                      Sync your income, expenses, invoices, and financial reports directly from QuickBooks.
-                    </p>
-                    <Button
-                      onClick={handleConnectQBO}
-                      disabled={connecting}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white"
-                    >
-                      {connecting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Connecting...
-                        </>
-                      ) : (
-                        <>
-                          <Link2 className="w-4 h-4 mr-2" />
-                          Connect QuickBooks
-                        </>
-                      )}
-                    </Button>
-                  </div>
 
-                  {/* Stripe - Coming Soon */}
-                  <div className="border border-gray-200 dark:border-white/10 rounded-xl p-6 opacity-60">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
-                          <span className="text-white font-bold text-lg">S</span>
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900 dark:text-white">
-                            Stripe
-                          </h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Payments & Subscriptions
-                          </p>
-                        </div>
-                      </div>
-                      <span className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full">
-                        Coming Soon
-                      </span>
+                    {/* Connect Button */}
+                    <div className="sm:self-center">
+                      <Button
+                        onClick={handleConnectQBO}
+                        disabled={connecting}
+                        size="lg"
+                        className="w-full sm:w-auto bg-white hover:bg-green-50 text-[#2ca01c] font-semibold px-8 py-6 text-base rounded-xl shadow-lg shadow-black/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                      >
+                        {connecting ? (
+                          <>
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                            Connecting...
+                          </>
+                        ) : (
+                          <>
+                            <Link2 className="w-5 h-5 mr-2" />
+                            Connect QuickBooks
+                          </>
+                        )}
+                      </Button>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                      Import payment data, subscriptions, and revenue metrics from Stripe.
-                    </p>
-                    <Button disabled className="w-full" variant="outline">
-                      Coming Soon
-                    </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Connected Accounts */}
             <Card className="bg-white dark:bg-gray-800/50 border-gray-200 dark:border-white/10">
