@@ -6,11 +6,14 @@ import { HubAssistant } from "@/components/layout/HubAssistant";
 import { Header } from "@/components/layout/Header";
 import { DashboardGrid } from "@/components/layout/DashboardGrid";
 import { EmptyDashboardState } from "@/components/widgets/EmptyDashboardState";
+import { SyncingState } from "@/components/widgets/SyncingState";
 import { useQBOConnection } from "@/hooks/useQBOConnection";
+import { useSyncStatus } from "@/hooks/useSyncStatus";
 import { Menu, X, MessageSquare, Loader2 } from "lucide-react";
 
 export default function DashboardPage() {
   const { connection, isConnected, companyId, loading } = useQBOConnection();
+  const { hasData, isSyncing, syncFailed, needsSync, status, refetch } = useSyncStatus(companyId);
   
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [assistantOpen, setAssistantOpen] = useState(false);
@@ -87,7 +90,7 @@ export default function DashboardPage() {
           <Header title="Finance Hub" />
         </div>
         
-        {/* Content Area - Show loading, empty state, or dashboard */}
+        {/* Content Area - Show loading, empty state, syncing, or dashboard */}
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="flex flex-col items-center gap-4">
@@ -95,7 +98,32 @@ export default function DashboardPage() {
               <p className="text-gray-500 dark:text-gray-400">Loading your data...</p>
             </div>
           </div>
-        ) : isConnected && companyId ? (
+        ) : !isConnected ? (
+          // Not connected - show empty state
+          <EmptyDashboardState />
+        ) : isSyncing ? (
+          // Connected but syncing in progress
+          <SyncingState 
+            status={status?.status === "pending" ? "pending" : "in_progress"} 
+            companyName={connection?.company_name}
+          />
+        ) : syncFailed ? (
+          // Sync failed - show error state with retry
+          <SyncingState 
+            status="failed" 
+            errorMessage={status?.error_message}
+            companyName={connection?.company_name}
+            onRetry={refetch}
+          />
+        ) : !hasData && needsSync ? (
+          // Connected but no data and no sync in progress
+          <SyncingState 
+            status="needs_sync" 
+            companyName={connection?.company_name}
+            onRetry={refetch}
+          />
+        ) : companyId ? (
+          // Has data - show dashboard
           <DashboardGrid companyId={companyId} />
         ) : (
           <EmptyDashboardState />

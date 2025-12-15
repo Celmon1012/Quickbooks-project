@@ -217,7 +217,7 @@ export async function GET(request: Request) {
     }
 
     // Create sync_status record (pending)
-    await supabase
+    const { error: syncStatusError } = await supabase
       .from("sync_status")
       .insert({
         connection_id: connectionId,
@@ -225,26 +225,38 @@ export async function GET(request: Request) {
         sync_type: isNewCompany ? "initial" : "incremental",
         status: "pending",
       });
+    
+    if (syncStatusError) {
+      console.error("Error creating sync_status:", syncStatusError);
+      // Continue anyway - sync status is not critical
+    }
 
-    // Trigger Pipedream backfill webhook if configured
-    if (PIPEDREAM_BACKFILL_WEBHOOK && isNewCompany) {
+    // ALWAYS trigger Pipedream backfill webhook if configured
+    // This handles both new connections and reconnections
+    if (PIPEDREAM_BACKFILL_WEBHOOK) {
       try {
         console.log("Triggering Pipedream backfill webhook...");
-        await fetch(PIPEDREAM_BACKFILL_WEBHOOK, {
+        const webhookResponse = await fetch(PIPEDREAM_BACKFILL_WEBHOOK, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             realm_id: realmId,
             company_id: companyId,
+            connection_id: connectionId,
             user_id: user.id,
-            action: "backfill",
+            action: isNewCompany ? "backfill" : "incremental_sync",
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token,
           }),
         });
+        console.log("Pipedream webhook response status:", webhookResponse.status);
         console.log("Pipedream webhook triggered successfully");
       } catch (e) {
         console.error("Failed to trigger Pipedream webhook:", e);
         // Don't fail the connection if webhook fails
       }
+    } else {
+      console.warn("PIPEDREAM_BACKFILL_WEBHOOK not configured - data will not sync automatically");
     }
 
     console.log("QBO connection saved successfully for realm:", realmId, "user:", user.id);
