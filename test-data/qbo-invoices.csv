@@ -1,0 +1,12 @@
+InvoiceNo,Customer,InvoiceDate,DueDate,Item(Product/Service),ItemDescription,ItemQuantity,ItemRate,ItemAmount
+1001,Test Customer A,12/01/2025,12/31/2025,Services,Consulting services,1,5000,5000
+1002,Test Customer B,12/03/2025,01/02/2026,Services,Web development,1,7500,7500
+1003,Test Customer A,12/05/2025,01/04/2026,Services,Strategy session,2,1600,3200
+1004,Test Customer C,12/08/2025,01/07/2026,Services,Software license,1,12000,12000
+1005,Test Customer B,12/10/2025,01/09/2026,Services,Technical support,1,4800,4800
+1006,Test Customer D,12/12/2025,01/11/2026,Services,Training session,4,750,3000
+1007,Test Customer A,12/14/2025,01/13/2026,Services,Project management,1,6500,6500
+1008,Test Customer E,12/15/2025,01/14/2026,Services,Marketing campaign,1,8500,8500
+1009,Test Customer C,12/16/2025,01/15/2026,Services,E-commerce features,1,9200,9200
+1010,Test Customer B,12/18/2025,01/17/2026,Services,Business analysis,1,4500,4500
+

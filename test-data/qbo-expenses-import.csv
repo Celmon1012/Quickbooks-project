@@ -1,0 +1,12 @@
+*Date,*Amount,*Vendor,*Account,Description,PaymentMethod
+12/01/2025,2500,ABC Landlord,Rent or Lease,Office rent December,Check
+12/02/2025,450,Office Depot,Office Supplies,Printer paper and supplies,Credit Card
+12/03/2025,1200,Amazon Web Services,Computer and Internet Expenses,Cloud hosting December,Credit Card
+12/05/2025,350,Adobe Systems,Software Subscriptions,Creative Cloud subscription,Credit Card
+12/07/2025,800,Google Ads,Advertising,Marketing campaign,Credit Card
+12/10/2025,650,Verizon,Telephone Expense,Phone and internet,Credit Card
+12/12/2025,1500,Delta Airlines,Travel,Client visit flight,Credit Card
+12/14/2025,280,Uber,Travel,Transportation,Credit Card
+12/15/2025,420,Zoom,Software Subscriptions,Video conferencing,Credit Card
+12/16/2025,1800,Insurance Co,Insurance,Business insurance,Check
+

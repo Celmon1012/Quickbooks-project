@@ -228,23 +228,43 @@ async function handleQBOCallback(
       });
 
     // Trigger Pipedream backfill webhook if configured
-    if (PIPEDREAM_BACKFILL_WEBHOOK && isNewCompany) {
+    // Send tokens so Pipedream can fetch data from QBO API
+    if (PIPEDREAM_BACKFILL_WEBHOOK) {
       try {
         console.log("Triggering Pipedream backfill webhook...");
-        await fetch(PIPEDREAM_BACKFILL_WEBHOOK, {
+        const webhookPayload = {
+          realm_id: realmId,
+          company_id: companyId,
+          connection_id: connectionId,
+          user_id: user.id,
+          action: isNewCompany ? "backfill" : "incremental_sync",
+          // CRITICAL: Send tokens so Pipedream can call QBO API
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token,
+        };
+        
+        console.log("Webhook payload:", { 
+          ...webhookPayload, 
+          access_token: "***hidden***",
+          refresh_token: "***hidden***"
+        });
+        
+        const webhookResponse = await fetch(PIPEDREAM_BACKFILL_WEBHOOK, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            realm_id: realmId,
-            company_id: companyId,
-            user_id: user.id,
-            action: "backfill",
-          }),
+          body: JSON.stringify(webhookPayload),
         });
-        console.log("Pipedream webhook triggered successfully");
+        
+        if (webhookResponse.ok) {
+          console.log("Pipedream webhook triggered successfully");
+        } else {
+          console.error("Pipedream webhook failed:", await webhookResponse.text());
+        }
       } catch (e) {
         console.error("Failed to trigger Pipedream webhook:", e);
       }
+    } else {
+      console.warn("PIPEDREAM_BACKFILL_WEBHOOK not configured - data will not sync automatically");
     }
 
     console.log("QBO connection saved successfully for realm:", realmId, "user:", user.id);
