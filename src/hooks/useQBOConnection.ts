@@ -22,7 +22,11 @@ export function useQBOConnection() {
 
   useEffect(() => {
     async function fetchConnection() {
+      console.log("🔌 [useQBOConnection] Checking QBO connection...");
+      console.log("🔌 [useQBOConnection] User:", user?.id || "Not logged in");
+      
       if (!user) {
+        console.log("🔌 [useQBOConnection] No user - skipping connection check");
         setLoading(false);
         return;
       }
@@ -32,6 +36,8 @@ export function useQBOConnection() {
 
       try {
         const supabase = createClient();
+        
+        console.log("🔌 [useQBOConnection] Fetching connection for user:", user.id);
         
         // Fetch the user's QBO connections - MUST filter by user_id!
         const { data, error: fetchError } = await supabase
@@ -54,12 +60,19 @@ export function useQBOConnection() {
         if (fetchError) {
           // No connection found is not an error state
           if (fetchError.code === "PGRST116") {
+            console.log("🔌 [useQBOConnection] No QBO connection found for this user");
             setConnection(null);
           } else {
-            console.error("Error fetching QBO connection:", fetchError);
+            console.error("🔌 [useQBOConnection] Error:", fetchError);
             setError(fetchError.message);
           }
         } else if (data) {
+          console.log("🔌 [useQBOConnection] ✅ QBO Connected!");
+          console.log("🔌 [useQBOConnection] Company ID:", data.company_id);
+          console.log("🔌 [useQBOConnection] Realm ID:", data.realm_id);
+          console.log("🔌 [useQBOConnection] Last Sync:", data.last_sync_at || "Never");
+          console.log("🔌 [useQBOConnection] Company Name:", (data.company as any)?.name || "Unknown");
+          
           setConnection({
             id: data.id,
             company_id: data.company_id,
@@ -71,7 +84,7 @@ export function useQBOConnection() {
           });
         }
       } catch (err) {
-        console.error("Error in useQBOConnection:", err);
+        console.error("🔌 [useQBOConnection] Error:", err);
         setError(err instanceof Error ? err.message : "Failed to fetch connection");
       } finally {
         setLoading(false);

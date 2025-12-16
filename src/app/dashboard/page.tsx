@@ -18,6 +18,19 @@ export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [assistantOpen, setAssistantOpen] = useState(false);
 
+  // Dashboard status logging
+  console.log("🏠 [Dashboard] =================================");
+  console.log("🏠 [Dashboard] Loading:", loading);
+  console.log("🏠 [Dashboard] QBO Connected:", isConnected);
+  console.log("🏠 [Dashboard] Company ID:", companyId || "None");
+  console.log("🏠 [Dashboard] Company Name:", connection?.company_name || "Unknown");
+  console.log("🏠 [Dashboard] Has Data:", hasData);
+  console.log("🏠 [Dashboard] Is Syncing:", isSyncing);
+  console.log("🏠 [Dashboard] Sync Failed:", syncFailed);
+  console.log("🏠 [Dashboard] Needs Sync:", needsSync);
+  console.log("🏠 [Dashboard] Sync Status:", status?.status || "None");
+  console.log("🏠 [Dashboard] =================================");
+
   return (
     <div className="flex h-screen w-full bg-gray-50 dark:bg-[#1a1f2e] transition-colors duration-300 overflow-hidden">
       {/* Mobile Sidebar Overlay */}

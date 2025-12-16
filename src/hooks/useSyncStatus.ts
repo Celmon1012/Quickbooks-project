@@ -45,7 +45,11 @@ export function useSyncStatus(companyId: string | null) {
   }, []);
 
   const fetchSyncStatus = useCallback(async () => {
+    console.log("🔄 [useSyncStatus] Checking sync status...");
+    console.log("🔄 [useSyncStatus] Company ID:", companyId || "None");
+    
     if (!companyId) {
+      console.log("🔄 [useSyncStatus] No company ID - skipping");
       setStatus(null);
       setLoading(false);
       return;
@@ -64,18 +68,20 @@ export function useSyncStatus(companyId: string | null) {
         .single();
 
       if (fetchError && fetchError.code !== "PGRST116") {
-        console.error("Error fetching sync status:", fetchError);
+        console.error("🔄 [useSyncStatus] Error fetching:", fetchError);
         setError(fetchError.message);
       } else {
+        console.log("🔄 [useSyncStatus] Sync status:", data?.status || "None");
         setStatus(data || null);
       }
 
       // Also check if there's any data
       const dataExists = await checkForData(companyId);
+      console.log("🔄 [useSyncStatus] Has monthly_pl data:", dataExists);
       setHasData(dataExists);
 
     } catch (err) {
-      console.error("Error in useSyncStatus:", err);
+      console.error("🔄 [useSyncStatus] Error:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch sync status");
     } finally {
       setLoading(false);

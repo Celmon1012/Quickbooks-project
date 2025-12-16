@@ -17,7 +17,11 @@ export function useKPIData(companyId: string | null) {
 
   useEffect(() => {
     async function fetchKPIData() {
+      console.log("📊 [useKPIData] Fetching KPI data...");
+      console.log("📊 [useKPIData] Company ID:", companyId || "None");
+      
       if (!companyId) {
+        console.log("📊 [useKPIData] No company ID - skipping fetch");
         setData(null);
         setLoading(false);
         return;
@@ -40,6 +44,8 @@ export function useKPIData(companyId: string | null) {
         const previousStart = new Date(year - 2, month, 1).toISOString().split("T")[0];
         const previousEnd = new Date(year - 1, month, 0).toISOString().split("T")[0];
 
+        console.log("📊 [useKPIData] Date range:", currentStart, "to", currentEnd);
+
         // Fetch current period data
         const { data: currentData, error: currentError } = await supabase
           .from("monthly_pl")
@@ -50,6 +56,8 @@ export function useKPIData(companyId: string | null) {
 
         if (currentError) throw currentError;
 
+        console.log("📊 [useKPIData] Current period rows:", currentData?.length || 0);
+
         // Fetch previous period data
         const { data: previousData, error: previousError } = await supabase
           .from("monthly_pl")
@@ -59,6 +67,8 @@ export function useKPIData(companyId: string | null) {
           .lte("month", previousEnd);
 
         if (previousError) throw previousError;
+
+        console.log("📊 [useKPIData] Previous period rows:", previousData?.length || 0);
 
         // Calculate totals
         const currentRevenue = (currentData || []).reduce((sum: number, row: any) => sum + (Number(row.revenue) || 0), 0);
@@ -76,6 +86,11 @@ export function useKPIData(companyId: string | null) {
           ? ((currentNetProfit - previousNetProfit) / Math.abs(previousNetProfit)) * 100 
           : 0;
 
+        console.log("📊 [useKPIData] ✅ Data loaded:");
+        console.log("📊 [useKPIData] - Total Revenue: $" + currentRevenue.toLocaleString());
+        console.log("📊 [useKPIData] - Net Profit: $" + currentNetProfit.toLocaleString());
+        console.log("📊 [useKPIData] - Revenue Change: " + revenueChange.toFixed(1) + "%");
+
         setData({
           totalRevenue: currentRevenue,
           revenueChange,
@@ -83,7 +98,7 @@ export function useKPIData(companyId: string | null) {
           netProfitChange,
         });
       } catch (err) {
-        console.error("Error fetching KPI data:", err);
+        console.error("📊 [useKPIData] ❌ Error:", err);
         setError(err instanceof Error ? err.message : "Failed to fetch KPI data");
         setData(null);
       } finally {

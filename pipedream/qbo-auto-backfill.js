@@ -174,8 +174,7 @@ export default defineComponent({
               month: `${year}-${String(month).padStart(2, "0")}-01`,
               revenue: parsed.totalIncome || 0,
               cogs: parsed.costOfGoodsSold || 0,
-              gross_profit: parsed.grossProfit || 0,
-              operating_expenses: parsed.totalExpenses || 0,
+              expenses: parsed.totalExpenses || 0,  // Fixed: was "operating_expenses"
               net_profit: parsed.netIncome || 0,
               updated_at: new Date().toISOString(),
             });
